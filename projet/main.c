@@ -3,25 +3,30 @@
 #include <math.h> // Pour pouvoir utiliser sin() et cos()
 #include "../GfxLib.h" // Seul cet include est necessaire pour faire du graphique
 #include "../BmpLib.h" // Cet include permet de manipuler des fichiers BMP
-#include <time.h>
-#include "couleur.h"
+#include "projet.h"
+
 
 
 // Largeur et hauteur par defaut d'une image correspondant a nos criteres
 #define LargeurFenetre 800
 #define HauteurFenetre 600
 
-void page(void);
-void afficheTab(char tabCouleur[20][6]);
-int aleatoire(int max, int min);
-couleur afficheCouleur(couleur c);
-verif verifCouleurRectangle1(couleur c,int rectangle, verif V, int aleaC);
-verif verifCouleurRectangle2(couleur c,int rectangle, verif V, int aleaC);
-verif verifCouleurRectangle3(couleur c,int rectangle, verif V, int aleaC);
+//void pageJeuMemoire(DonneesImageRGB* image);
+//void pageJeuMobilite(DonneesImageRGB* image);
+//void pageJeuTestVA(DonneesImageRGB* image);
+void snakeN1(void);
+void pointN1(int px1,int py1);
+int etatPoint1(int px1,int py1,int erreur);
+void snakeN2(void);
+void pointN2(int px2,int py2);
+void snakeN3(void);
+void pointN3(int px3,int py3);
 void pageResultat(void);
 /* La fonction de gestion des evenements, appelee automatiquement par le systeme
 des qu'une evenement survient */
 void gestionEvenement(EvenementGfx evenement);
+
+
 
 int main(int argc, char **argv)
 {
@@ -43,27 +48,41 @@ int main(int argc, char **argv)
 des qu'une evenement survient */
 void gestionEvenement(EvenementGfx evenement)
 {
+	static int page;
+	static int px1;
+	static int py1;	
+	static int px2;
+	static int py2;
+	static int px3;
+	static int py3;
+	static int dedans;
+	static int erreur;
+	static int faute1;
+	static int faute2;
+	static int faute3;
+	static int faute;
+	static char f1[20];
+	static char f2[20];
+	static char f3[20];
+	static char fT[20];
 	static bool pleinEcran = false; // Pour savoir si on est en mode plein ecran ou pas
 	static DonneesImageRGB *image = NULL; // L'image a afficher au centre de l'ecran
-	static char tabCouleur[20][6];
-	static int aleaC;
-	static int aleaM;
-	static int rectangle;
-	static verif V;
-	static couleur c;
-	static chrono k;
-	static char K[50];
-	static int Page = 0;
-	static char p[20];
-	static char f[20];
 	switch (evenement)
 	{
 		case Initialisation:
-			afficheTab(tabCouleur);
-			c = afficheCouleur(c);
-			k.min = 0;
-			k.sec = 0;
-			demandeTemporisation(1500);
+			image = lisBMPRGB("flying.bmp");
+			px1=400;
+			py1=580;
+			px2=730;
+			py2=555;
+			px3=25;
+			py3=545;
+			page=1;
+			faute=0;
+			faute1=0;
+			faute2=0;
+			faute3=0;
+			demandeTemporisation(20);
 			break;
 		
 		case Temporisation:
@@ -71,29 +90,63 @@ void gestionEvenement(EvenementGfx evenement)
 			break;
 			
 		case Affichage:
-				// On part d'un fond d'ecran blanc
+			// On part d'un fond d'ecran blanc
+			effaceFenetre (255, 255, 255);
+			//pageJeuMemoire(image);
+			//pageJeuMobilite(image);
+			//pageJeuTestVA(image);
+			if(page==1){
+				snakeN1();
+				pointN1(px1,py1);
+				dedans = etatPoint1(px1,py1,dedans);
+				if(tempsErreur(dedans, erreur) != erreur){
+					erreur = tempsErreur(dedans, erreur);
+				}else if(erreur != 0){
+					erreur = 0;
+					faute1 += 1;
+				}
+				printf("erreur=%d\n",faute1);
+				sprintf(f1,"%d fautes",faute1);
+			}else if(page==2){
 				effaceFenetre (255, 255, 255);
-				if (Page == 0)
-				{
-					page();
-				aleaC=aleatoire(19,0);
-				couleurCourante(c.tabC[aleaC][0],c.tabC[aleaC][1],c.tabC[aleaC][2]);
-				epaisseurDeTrait(3);
-				aleaM=aleatoire(19,0);
-				afficheChaine(tabCouleur[aleaM],100,LargeurFenetre-550,HauteurFenetre-300);
-				k = majChrono(k, &Page);
-				sprintf(K,"chrono: %d secs",k.sec);
-				couleurCourante(243, 214, 23);
+				snakeN2();
+				pointN2(px2,py2);
+				dedans = etatPoint2(px2,py2,dedans);
+				if(tempsErreur(dedans, erreur) != erreur){
+					erreur = tempsErreur(dedans, erreur);
+				}else if(erreur != 0){
+					erreur = 0;
+					faute2 += 1;
+				}
+				printf("erreur=%d\n",faute2);
+				sprintf(f2,"%d fautes",faute2);
+			}
+			else if(page==3){
+				effaceFenetre (255, 255, 255);
+				snakeN3();
+				pointN3(px3,py3);
+				dedans = etatPoint3(px3,py3,dedans);
+				if(tempsErreur(dedans, erreur) != erreur){
+					erreur = tempsErreur(dedans, erreur);
+				}else if(erreur != 0){
+					erreur = 0;
+					faute3 += 1;
+				}
+				printf("erreur=%d\n",faute3);
+				sprintf(f3,"%d fautes",faute3);
+			}
+			else if(page==4){
+				effaceFenetre(255,255,255);
+				faute=faute1+faute2+faute3;
+				sprintf(fT,"TOTAL : %d fautes",faute);
+				pageResultat();
+				couleurCourante(0,0,0);
 				epaisseurDeTrait(2);
-				afficheChaine(K,15,LargeurFenetre-795,HauteurFenetre-130);
-				}
-				if(Page==1){
-					pageResultat();
-					sprintf(p,"%d",V.point);
-					sprintf(f,"%d",V.faute);
-					afficheChaine(p,25,LargeurFenetre-600,HauteurFenetre-285);
-					afficheChaine(f,25,LargeurFenetre-600,HauteurFenetre-365);
-				}
+				afficheChaine(f1,25,LargeurFenetre-600,HauteurFenetre-285);
+				afficheChaine(f2,25,LargeurFenetre-600,HauteurFenetre-365);
+				afficheChaine(f3,25,LargeurFenetre-600,HauteurFenetre-445);
+				afficheChaine(fT,25,LargeurFenetre-362,HauteurFenetre-388);
+			}
 			break;
 			
 		case Clavier:
@@ -146,25 +199,37 @@ void gestionEvenement(EvenementGfx evenement)
 		case BoutonSouris:
 			if (etatBoutonSouris() == GaucheAppuye)
 			{
-				if(abscisseSouris()>LargeurFenetre-700 && ordonneeSouris()>HauteurFenetre-550 && abscisseSouris()<LargeurFenetre-550 && ordonneeSouris()<HauteurFenetre-400){
-					V=verifCouleurRectangle1(c,rectangle,V, aleaC);
-					printf("%d\n", aleaC);
-				}
-				else if(abscisseSouris()>LargeurFenetre-500 && ordonneeSouris()>HauteurFenetre-550 && abscisseSouris()<LargeurFenetre-350 && ordonneeSouris()<HauteurFenetre-400){
-					V=verifCouleurRectangle2(c,rectangle,V,aleaC);
-				}
-				else if(abscisseSouris()>LargeurFenetre-300 && ordonneeSouris()>HauteurFenetre-550 && abscisseSouris()<LargeurFenetre-150 && ordonneeSouris()<HauteurFenetre-400){
-					V=verifCouleurRectangle3(c,rectangle,V,aleaC);
-				}
 				printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			}
 			else if (etatBoutonSouris() == GaucheRelache)
 			{
+				if(px1>LargeurFenetre-145 && py1>HauteurFenetre-525 && px1<LargeurFenetre-50 && py1<HauteurFenetre-450 && page == 1){
+					page=2;
+				}
+				if(px2>LargeurFenetre-120 && py2>HauteurFenetre-585 && px2<LargeurFenetre-50 && py2<HauteurFenetre-560 && page == 2){
+					page=3;
+				}
+				if(px3>LargeurFenetre-210 && py3>HauteurFenetre-575 && px3<LargeurFenetre-145 && py3<HauteurFenetre-555 && page == 3){
+					page=4;
+				}
 				printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			}
 			break;
 		
 		case Souris: // Si la souris est deplacee
+			if(page == 1){
+				px1=abscisseSouris();
+				py1=ordonneeSouris();
+				printf("%d,%d\n",px1,py1);
+			}else if(page==2){
+				px2=abscisseSouris();
+				py2=ordonneeSouris();
+				printf("%d,%d\n",px2,py2);
+			}else if(page == 3){
+				px3=abscisseSouris();
+				py3=ordonneeSouris();
+				printf("%d,%d\n",px3,py3);
+			}
 			break;
 		
 		case Inactivite: // Quand aucun message n'est disponible
