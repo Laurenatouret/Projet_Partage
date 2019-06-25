@@ -1,13 +1,12 @@
 #include <stdlib.h> // Pour pouvoir utiliser exit()
 #include <stdio.h> // Pour pouvoir utiliser printf()
 #include <math.h> // Pour pouvoir utiliser sin() et cos()
-#include <time.h>
-#include "../../tpGfx/GfxLib.h" // Seul cet include est necessaire pour faire du graphique
-#include "../../tpGfx/BmpLib.h" // Cet include permet de manipuler des fichiers BMP
-#include "../../tpGfx/ESLib.h" // Pour utiliser valeurAleatoire()
-#include "mem.h"
+#include "../tpGfx/GfxLib.h" // Seul cet include est necessaire pour faire du graphique
+#include "../tpGfx/BmpLib.h" // Cet include permet de manipuler des fichiers BMP
+#include "../tpGfx/ESLib.h" // Pour utiliser valeurAleatoire()
+#include "pagesH.h"
 
-
+// Largeur et hauteur par defaut d'une image correspondant a nos criteres
 #define LargeurFenetre 800
 #define HauteurFenetre 600
 
@@ -58,62 +57,76 @@ des qu'une evenement survient */
 void gestionEvenement(EvenementGfx evenement)
 {
 	static bool pleinEcran = false; // Pour savoir si on est en mode plein ecran ou pas
-	static DonneesImageRGB* dos = NULL;
+	static DonneesImageRGB* memoire= NULL;
+	static DonneesImageRGB* mouvement= NULL;
+	static DonneesImageRGB* rapidite= NULL;
+	static DonneesImageRGB* image = NULL;
 	
-	srand(time(0));
-	static carte initTab[3][4];
-	static carte tabMel[3][4];
-	static int cpt=0;
-	static int x=0;
-	static int y=0;
-	static int dosH=0;
-	static int dosL=0;
-	
-	carte c;
+	static test c;
+	/*Elsa 
+	static structure point;
+	static int resultat = 0;
+	int temps = 0;
+	int tempsFinal = 0;
+	long sec = CLOCKS_PER_SEC;
+
+	*/
 
 
 	switch (evenement)
 	{
-		case Initialisation:			
-			dos = lisBMPRGB("../../dos.bmp");
-	
-			printf("1\n");
-			initCarte(c);
-			iniTab(initTab,c);
-			iniMel(tabMel,c);
-			iniEtat(dos, c, tabMel);
-			printf("mel ok\n");
-			printf("placement lancement\n");
-			placement(c, tabMel, initTab);
-			printf("placement ok\n");
-			mel(initTab, tabMel,c);
+		case Initialisation:
+		memoire = lisBMPRGB ("../memoire.bmp");
+		mouvement= lisBMPRGB("../mouvement.bmp");
+		rapidite = lisBMPRGB("../rapidite.bmp");
+		image = lisBMPRGB ("../flying.bmp");
+		/*
+			point.x = 300;
+			point.y = 300;
+			couleurCourante(255, 0, 0);
+			cercle(300, 300, 30);
+			clock_t ti, tf;
+			ti = clock();
+			
+			temps = (ti/sec);
+			printf("le temps : %i    ",temps);
+		*/
 
-			
-			
 
 			demandeTemporisation(20);
 			break;
 		
 		case Temporisation:
-			if(cpt==2){
-				condition(tabMel, c);
-				printfTab(tabMel);
-				c = nettoie(tabMel, c);
-				final(tabMel, c);
-				printfTab(tabMel);
-				cpt = 0;
-			}
-				
+			gereClic(c,image,memoire,mouvement,rapidite);
+
 			rafraichisFenetre();
 			break;
 			
-		case Affichage:
+		case Affichage:					
+			effaceFenetre (255, 255, 255);
+			pagetest();
+			gereClic(c,image,memoire,mouvement,rapidite);
+			/*Elsa*/
+			/*
+			effaceFenetre(255,255,255);
+			couleurCourante(255, 0, 0);
+			cercle(point.x,point.y, 30);
+			rafraichisFenetre();
 			
-			effaceFenetre (255, 255, 255);	
-			afficheDos(dos, c, tabMel);	
-			//printf("affiche lancement\n");
-			afficheImage(c,tabMel);
-			//printf("lancement ok\n");
+			
+			tf = clock();
+			tempsFinal = (tf/sec);
+			 
+			if (tempsFinal > 11) {
+				
+				effaceFenetre(255,255,255);
+				affichageScore();
+				printf("le score est de %d    ", resultat);
+				printf("le temps final est de %d      ", tempsFinal);
+				
+				
+			}
+			*/					
 			break;
 			
 		case Clavier:
@@ -121,8 +134,8 @@ void gestionEvenement(EvenementGfx evenement)
 
 			switch (caractereClavier())
 			{
+				case 'Q': /* Pour sortir quelque peu proprement du programme */
 				case 'q':
-					
 					
 					termineBoucleEvenements();
 					break;
@@ -163,31 +176,11 @@ void gestionEvenement(EvenementGfx evenement)
 			break;
 
 		case BoutonSouris:
-		dosL = dos->largeurImage;
-		dosH = dos->hauteurImage;
-		x = abscisseSouris();
-		y = ordonneeSouris();
+		
 			if (etatBoutonSouris() == GaucheAppuye)
 			{
-				if(
-		(75<x && x<75+dosL && 55<y && y<55+dosH)
-	||(250<x && x<250 + dosL && 55<y && y<55+dosH)
-	||(425<x && x<425+dosL && 55<y && y<55+dosH)
-	||(600<x && x<600+dosL && 55<y && y<55+dosH)
-	||(75<x && x<75+dosL && 230<y && y<230+dosH)
-	||(250<x && x<250+dosL && 230<y && y<230+dosH)
-	||(425<x && x<475+dosL && 230<y && y<230+dosH)
-	||(600<x && x<600+dosL && 230<y && y<230+dosH)
-	||(75<x && x<75+dosL && 405<y && y<405+dosH)
-	||(250<x && x<250+dosL && 405<y && y<405+dosH)
-	||(425<x && x<425+dosL && 405<y && y<405+dosH)
-	||(600<x && x<600+dosL && 405<y && y<405+dosH)){
-		
-				Etat(dos,tabMel,c);
-				cpt++;
-				printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
-			
-				}}
+				c= gereClic1(c);
+			}
 			else if (etatBoutonSouris() == GaucheRelache)
 			{
 				printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
@@ -207,8 +200,3 @@ void gestionEvenement(EvenementGfx evenement)
 			break;
 	}
 }
-
-
-
-
-	

@@ -1,0 +1,14 @@
+Pages: pagesM.o pages.o ../tpGfx/libisentlib.a
+	gcc pagesM.o pages.o  -o pages ../tpGfx/libisentlib.a -lm -lglut -lGL -lX11
+
+pagesM.o: pagesM.c ../tpGfx/BmpLib.h ../tpGfx/GfxLib.h ../tpGfx/ESLib.h
+	gcc -g -Wall -c pagesM.c
+	
+pages.o: pages.c ../tpGfx/BmpLib.h ../tpGfx/GfxLib.h ../tpGfx/ESLib.h
+	gcc -g -Wall -c pages.c
+
+
+	
+
+clean:
+	rm pagesM *.o

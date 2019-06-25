@@ -144,29 +144,29 @@ void mel(carte initTab[3][4], carte tabMel[3][4],carte c){
 //assimiler une ID a un nombre
 void placement(carte c,  carte tabMel[3][4], carte initTab[3][4]){
 
-	initTab[0][0].image=lisBMPRGB("../loic.bmp");
+	initTab[0][0].image=lisBMPRGB("../../loic.bmp");
 		initTab[0][0].ID = 1;
-	initTab[0][1].image=lisBMPRGB("../loic.bmp");
+	initTab[0][1].image=lisBMPRGB("../../loic.bmp");
 		initTab[0][1].ID = 1;
-	initTab[0][2].image=lisBMPRGB("../antoine.bmp");
+	initTab[0][2].image=lisBMPRGB("../../antoine.bmp");
 		initTab[0][2].ID = 2;
-	initTab[0][3].image=lisBMPRGB("../antoine.bmp");
+	initTab[0][3].image=lisBMPRGB("../../antoine.bmp");
 		initTab[0][3].ID = 2;
-	initTab[1][0].image=lisBMPRGB("../jules.bmp");
+	initTab[1][0].image=lisBMPRGB("../../jules.bmp");
 		initTab[1][0].ID = 3;
-	initTab[1][1].image=lisBMPRGB("../jules.bmp");
+	initTab[1][1].image=lisBMPRGB("../../jules.bmp");
 		initTab[1][1].ID = 3;
-	initTab[1][2].image=lisBMPRGB("../mat.bmp");
+	initTab[1][2].image=lisBMPRGB("../../mat.bmp");
 		initTab[1][2].ID = 4;
-	initTab[1][3].image=lisBMPRGB("../mat.bmp");
+	initTab[1][3].image=lisBMPRGB("../../mat.bmp");
 		initTab[1][3].ID = 4;
-	initTab[2][0].image=lisBMPRGB("../william.bmp");
+	initTab[2][0].image=lisBMPRGB("../../william.bmp");
 		initTab[2][0].ID = 5;
-	initTab[2][1].image=lisBMPRGB("../william.bmp");
+	initTab[2][1].image=lisBMPRGB("../../william.bmp");
 		initTab[2][1].ID = 5;
-	initTab[2][2].image=lisBMPRGB("../louis.bmp");
+	initTab[2][2].image=lisBMPRGB("../../louis.bmp");
 		initTab[2][2].ID = 6;
-	initTab[2][3].image=lisBMPRGB("../louis.bmp");
+	initTab[2][3].image=lisBMPRGB("../../louis.bmp");
 		initTab[2][3].ID = 6;
 	
 }
@@ -257,33 +257,71 @@ void Etat(DonneesImageRGB* dos,carte tabMel[3][4], carte c){
 }
 
 void condition(carte tabMel[3][4], carte c){
-	int i=0;
-	int j=0;
-	int k=0;
-	int m=0;
-	for (i=0; i<3; i++){
-		for (j=0; j<4; j++){
-			for (k=0; k<3; k++){
-				for (m=0; m<4; m++){
-					if(tabMel[i][j].etat == 1 && tabMel[k][m].etat == 1 && i != k && j != m){
-						printf("etat : %d && %d\n", tabMel[i][j].etat, tabMel[k][m].etat);
-						
-						if(tabMel[i][j].ID == tabMel[k][m].ID){
-							tabMel[i][j].etat = 2 ;
-							tabMel[k][m].etat = 2 ; 
-							printf("etat : %d && %d\n", tabMel[i][j].etat, tabMel[k][m].etat);
-							
-						}
-						else{
-							tabMel[i][j].etat = 0;
-							tabMel[k][m].etat = 0;
-							printf("etat : %d && %d\n", tabMel[i][j].etat, tabMel[k][m].etat);
-						}
-					}
-				}
+	int i1=0;
+	int j1=0;
+	int i2=0;
+	int j2=0;
+	int cpt=0;
+	for(int i=0; i<3; i++){
+		for(int j=0; j<4; j++){
+		if(tabMel[i][j].etat==1 && cpt==0){
+			i1 = i;
+			j1=j;
+			cpt++;
+		}
+		if(tabMel[i][j].etat==1 && cpt==1){
+			j2=j;
+			i2=i;
+		}
+		}
+	}
+	if(tabMel[i1][j1].ID==tabMel[i2][j2].ID){
+		tabMel[i2][j2].etat = 2;
+		tabMel[i1][j1].etat = 2;
+
+	}
+	else{
+		c.erreur = c.erreur+1;
+		printf("erreur : %d\n", c.erreur);
+	}
+}
+
+carte nettoie (carte tabMel[3][4], carte c){
+	for(int i=0; i<3; i++){
+		for(int j=0; j<4; j++){
+			if(tabMel[i][j].etat == 1){
+				tabMel[i][j].etat = 0;
 			}
 		}
 	}
+	return c;
+}
+
+void printfTab(carte tabMel[3][4]){
+	for(int i=0; i<3; i++){
+		for(int j=0; j<4; j++){
+			printf("tabMel[%d][%d] = %d\n", i, j, tabMel[i][j].etat);
+		}
+	}
+	printf("\n");
+}
+
+void final(carte tabMel[3][4], carte c){
+	for(int i=0; i<3; i++){
+		for(int j=0; j<4; j++){
+			if(tabMel[i][j].etat!=2){
+				j=3;
+				i=2;
+			}
+			else{
+				termineBoucleEvenements();
+			}
+		}
+	}
+}	
+
+void printfErreur(carte c){
+	printf("erreur : %d\n", c.erreur);
 }
 						
 
